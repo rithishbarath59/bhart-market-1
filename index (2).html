@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>₹ Bharat Markets</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#040d18;color:#c8d8e8;font-family:'Space Mono','Courier New',monospace;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:#040d18;}
+::-webkit-scrollbar-thumb{background:#1a2e44;border-radius:4px;}
+input::placeholder{color:#2a3f56;}
+button{font-family:'Space Mono','Courier New',monospace;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+const MY_PORTFOLIO = [
+  { symbol:"TATAPOWER", name:"Tata Power Co Ltd",      qty:9,  avgPrice:379.05 },
+  { symbol:"TATASTEEL", name:"Tata Steel Limited",     qty:7,  avgPrice:152.41 },
+  { symbol:"SUZLON",    name:"Suzlon Energy Ltd",       qty:14, avgPrice:57.64  },
+  { symbol:"CGPOWER",   name:"CG Power & Ind Sol",      qty:1,  avgPrice:719.95 },
+  { symbol:"ITC",       name:"ITC Ltd",                 qty:1,  avgPrice:399.15 },
+  { symbol:"TIMEXIND",  name:"Timex Group India",       qty:2,  avgPrice:249.85 },
+  { symbol:"SAKSOFT",   name:"Saksoft Limited",         qty:1,  avgPrice:198.50 },
+  { symbol:"DREAMFOLKS",name:"Dreamfolks Services",     qty:1,  avgPrice:263.85 },
+  { symbol:"JAIBALAJI", name:"Jai Balaji Industries",   qty:2,  avgPrice:120.32 },
+  { symbol:"LIKHITHA",  name:"Likhitha Infrastructure", qty:1,  avgPrice:266.35 },
+  { symbol:"RSYSTEMS",  name:"R Sys International",     qty:1,  avgPrice:333.95 },
+  { symbol:"AVANTEL",   name:"Avantel Limited",         qty:1,  avgPrice:106.65 },
+];
+
+const MF_CATALOG = [
+  {name:"Mirae Asset Large Cap Fund",category:"Large Cap"},
+  {name:"Axis Bluechip Fund",category:"Large Cap"},
+  {name:"ICICI Pru Bluechip Fund",category:"Large Cap"},
+  {name:"Kotak Bluechip Fund",category:"Large Cap"},
+  {name:"SBI Bluechip Fund",category:"Large Cap"},
+  {name:"HDFC Top 100 Fund",category:"Large Cap"},
+  {name:"Canara Robeco Bluechip Equity",category:"Large Cap"},
+  {name:"Nippon India Large Cap Fund",category:"Large Cap"},
+  {name:"HDFC Mid Cap Opportunities",category:"Mid Cap"},
+  {name:"Kotak Emerging Equity Fund",category:"Mid Cap"},
+  {name:"Axis Midcap Fund",category:"Mid Cap"},
+  {name:"DSP Midcap Fund",category:"Mid Cap"},
+  {name:"Edelweiss Mid Cap Fund",category:"Mid Cap"},
+  {name:"Motilal Oswal Midcap Fund",category:"Mid Cap"},
+  {name:"Nippon India Growth Fund",category:"Mid Cap"},
+  {name:"SBI Magnum Midcap Fund",category:"Mid Cap"},
+  {name:"UTI Mid Cap Fund",category:"Mid Cap"},
+  {name:"Sundaram Mid Cap Fund",category:"Mid Cap"},
+  {name:"Nippon India Small Cap Fund",category:"Small Cap"},
+  {name:"SBI Small Cap Fund",category:"Small Cap"},
+  {name:"Quant Small Cap Fund",category:"Small Cap"},
+  {name:"DSP Small Cap Fund",category:"Small Cap"},
+  {name:"Axis Small Cap Fund",category:"Small Cap"},
+  {name:"HDFC Small Cap Fund",category:"Small Cap"},
+  {name:"Kotak Small Cap Fund",category:"Small Cap"},
+  {name:"Canara Robeco Small Cap Fund",category:"Small Cap"},
+  {name:"ICICI Pru Smallcap Fund",category:"Small Cap"},
+  {name:"Tata Small Cap Fund",category:"Small Cap"},
+  {name:"Union Small Cap Fund",category:"Small Cap"},
+  {name:"Parag Parikh Flexi Cap Fund",category:"Flexi Cap"},
+  {name:"HDFC Flexi Cap Fund",category:"Flexi Cap"},
+  {name:"Quant Flexi Cap Fund",category:"Flexi Cap"},
+  {name:"Canara Robeco Flexi Cap",category:"Flexi Cap"},
+  {name:"UTI Flexi Cap Fund",category:"Flexi Cap"},
+  {name:"SBI Flexicap Fund",category:"Flexi Cap"},
+  {name:"ICICI Pru Multicap Fund",category:"Multi Cap"},
+  {name:"Nippon India Multicap Fund",category:"Multi Cap"},
+  {name:"Kotak Multicap Fund",category:"Multi Cap"},
+  {name:"Quant Active Fund",category:"Multi Cap"},
+  {name:"Mirae Asset Tax Saver Fund",category:"ELSS"},
+  {name:"Axis Long Term Equity Fund",category:"ELSS"},
+  {name:"Quant Tax Plan",category:"ELSS"},
+  {name:"Canara Robeco Equity Tax Saver",category:"ELSS"},
+  {name:"DSP Tax Saver Fund",category:"ELSS"},
+  {name:"SBI Long Term Equity Fund",category:"ELSS"},
+  {name:"HDFC ELSS Tax Saver",category:"ELSS"},
+  {name:"ICICI Pru Technology Fund",category:"Sectoral-IT"},
+  {name:"Tata Digital India Fund",category:"Sectoral-IT"},
+  {name:"Franklin India Technology Fund",category:"Sectoral-IT"},
+  {name:"Nippon India Pharma Fund",category:"Sectoral-Pharma"},
+  {name:"SBI Healthcare Opportunities",category:"Sectoral-Pharma"},
+  {name:"Mirae Asset Healthcare Fund",category:"Sectoral-Pharma"},
+  {name:"Quant Infrastructure Fund",category:"Sectoral-Infra"},
+  {name:"Canara Robeco Infrastructure Fund",category:"Sectoral-Infra"},
+  {name:"DSP Natural Resources Fund",category:"Sectoral-Energy"},
+  {name:"Nippon India ETF Consumption",category:"Sectoral-Consumption"},
+  {name:"UTI Nifty 50 Index Fund",category:"Index"},
+  {name:"HDFC Nifty 50 Index Fund",category:"Index"},
+  {name:"Nippon India Index Nifty 50",category:"Index"},
+  {name:"SBI Nifty Index Fund",category:"Index"},
+  {name:"UTI Nifty Next 50 Index",category:"Index"},
+  {name:"Motilal Oswal Nifty Midcap 150",category:"Index"},
+  {name:"Motilal Oswal Nifty Smallcap 250",category:"Index"},
+  {name:"HDFC Sensex Index Fund",category:"Index"},
+  {name:"ICICI Pru Equity & Debt Fund",category:"Hybrid"},
+  {name:"SBI Equity Hybrid Fund",category:"Hybrid"},
+  {name:"Mirae Asset Hybrid Equity Fund",category:"Hybrid"},
+  {name:"Kotak Equity Hybrid Fund",category:"Hybrid"},
+  {name:"HDFC Hybrid Equity Fund",category:"Hybrid"},
+  {name:"Canara Robeco Equity Hybrid",category:"Hybrid"},
+  {name:"Gold (MCX Spot)",category:"Gold"},
+  {name:"SBI Gold Fund",category:"Gold"},
+  {name:"HDFC Gold Fund",category:"Gold"},
+  {name:"Axis Gold Fund",category:"Gold"},
+  {name:"Nippon India Gold Savings Fund",category:"Gold"},
+  {name:"Kotak Gold Fund",category:"Gold"},
+  {name:"Nippon India ETF Gold BeES",category:"Gold ETF"},
+  {name:"HDFC Gold ETF",category:"Gold ETF"},
+  {name:"SBI ETF Gold",category:"Gold ETF"},
+  {name:"Kotak Gold ETF",category:"Gold ETF"},
+  {name:"UTI Gold ETF",category:"Gold ETF"},
+  {name:"Silver (MCX Spot)",category:"Silver"},
+  {name:"Nippon India Silver ETF",category:"Silver ETF"},
+  {name:"ICICI Pru Silver ETF",category:"Silver ETF"},
+  {name:"Aditya Birla Silver ETF",category:"Silver ETF"},
+  {name:"HDFC Silver ETF",category:"Silver ETF"},
+  {name:"Axis Silver ETF",category:"Silver ETF"},
+  {name:"Kotak Silver ETF",category:"Silver ETF"},
+  {name:"Mirae Asset Silver ETF",category:"Silver ETF"},
+  {name:"HDFC Liquid Fund",category:"Liquid"},
+  {name:"SBI Liquid Fund",category:"Liquid"},
+  {name:"Nippon India Liquid Fund",category:"Liquid"},
+  {name:"ICICI Pru Overnight Fund",category:"Liquid"},
+];
+
+const MF_BASE_NAV = {
+  "Mirae Asset Large Cap Fund":98.2,"Axis Bluechip Fund":62.4,"ICICI Pru Bluechip Fund":104.5,
+  "Kotak Bluechip Fund":78.3,"SBI Bluechip Fund":88.6,"HDFC Top 100 Fund":1054.2,
+  "Canara Robeco Bluechip Equity":64.8,"Nippon India Large Cap Fund":92.1,
+  "HDFC Mid Cap Opportunities":142.5,"Kotak Emerging Equity Fund":134.9,
+  "Axis Midcap Fund":96.7,"DSP Midcap Fund":118.4,"Edelweiss Mid Cap Fund":88.3,
+  "Motilal Oswal Midcap Fund":98.7,"Nippon India Growth Fund":4210.3,
+  "SBI Magnum Midcap Fund":246.8,"UTI Mid Cap Fund":312.5,"Sundaram Mid Cap Fund":1024.6,
+  "Nippon India Small Cap Fund":188.3,"SBI Small Cap Fund":155.7,"Quant Small Cap Fund":224.1,
+  "DSP Small Cap Fund":146.3,"Axis Small Cap Fund":82.5,"HDFC Small Cap Fund":132.8,
+  "Kotak Small Cap Fund":248.6,"Canara Robeco Small Cap Fund":36.4,
+  "ICICI Pru Smallcap Fund":78.9,"Tata Small Cap Fund":42.7,"Union Small Cap Fund":52.3,
+  "Parag Parikh Flexi Cap Fund":76.8,"HDFC Flexi Cap Fund":55.8,"Quant Flexi Cap Fund":88.4,
+  "Canara Robeco Flexi Cap":34.2,"UTI Flexi Cap Fund":348.6,"SBI Flexicap Fund":96.2,
+  "ICICI Pru Multicap Fund":726.3,"Nippon India Multicap Fund":282.4,
+  "Kotak Multicap Fund":18.6,"Quant Active Fund":624.8,
+  "Mirae Asset Tax Saver Fund":46.8,"Axis Long Term Equity Fund":82.4,"Quant Tax Plan":412.6,
+  "Canara Robeco Equity Tax Saver":142.3,"DSP Tax Saver Fund":118.6,
+  "SBI Long Term Equity Fund":396.2,"HDFC ELSS Tax Saver":1248.5,
+  "ICICI Pru Technology Fund":211.6,"Tata Digital India Fund":52.3,
+  "Franklin India Technology Fund":562.4,"Nippon India Pharma Fund":428.6,
+  "SBI Healthcare Opportunities":418.2,"Mirae Asset Healthcare Fund":32.4,
+  "Quant Infrastructure Fund":38.6,"Canara Robeco Infrastructure Fund":182.3,
+  "DSP Natural Resources Fund":84.6,"Nippon India ETF Consumption":112.4,
+  "UTI Nifty 50 Index Fund":186.4,"HDFC Nifty 50 Index Fund":248.6,
+  "Nippon India Index Nifty 50":42.8,"SBI Nifty Index Fund":248.3,
+  "UTI Nifty Next 50 Index":82.6,"Motilal Oswal Nifty Midcap 150":28.4,
+  "Motilal Oswal Nifty Smallcap 250":22.6,"HDFC Sensex Index Fund":924.6,
+  "ICICI Pru Equity & Debt Fund":362.4,"SBI Equity Hybrid Fund":296.8,
+  "Mirae Asset Hybrid Equity Fund":24.6,"Kotak Equity Hybrid Fund":58.4,
+  "HDFC Hybrid Equity Fund":128.6,"Canara Robeco Equity Hybrid":342.8,
+  "Gold (MCX Spot)":92400,"SBI Gold Fund":24.8,"HDFC Gold Fund":26.4,
+  "Axis Gold Fund":22.6,"Nippon India Gold Savings Fund":28.4,"Kotak Gold Fund":24.2,
+  "Nippon India ETF Gold BeES":6820,"HDFC Gold ETF":6780,"SBI ETF Gold":6840,
+  "Kotak Gold ETF":6790,"UTI Gold ETF":6810,
+  "Silver (MCX Spot)":96200,"Nippon India Silver ETF":108.4,
+  "ICICI Pru Silver ETF":106.8,"Aditya Birla Silver ETF":104.2,"HDFC Silver ETF":107.6,
+  "Axis Silver ETF":105.8,"Kotak Silver ETF":106.4,"Mirae Asset Silver ETF":103.8,
+  "HDFC Liquid Fund":4824.6,"SBI Liquid Fund":3842.6,
+  "Nippon India Liquid Fund":6248.4,"ICICI Pru Overnight Fund":1346.8,
+};
+
+const CATEGORY_COLORS = {
+  "Large Cap":"#00E5FF","Mid Cap":"#FFD93D","Small Cap":"#FF6B6B",
+  "Flexi Cap":"#6BCB77","Multi Cap":"#A8DADC","ELSS":"#C77DFF",
+  "Sectoral-IT":"#FF9F1C","Sectoral-Pharma":"#2EC4B6","Sectoral-Infra":"#FF7F11",
+  "Sectoral-Energy":"#E71D36","Sectoral-Consumption":"#FFB347",
+  "Index":"#87CEEB","Hybrid":"#DDA0DD",
+  "Gold":"#FFD700","Gold ETF":"#FFC125",
+  "Silver":"#C0C0C0","Silver ETF":"#A9A9A9","Liquid":"#90EE90",
+};
+
+const COLORS=["#00E5FF","#FF6B6B","#FFD93D","#6BCB77","#C77DFF","#FF9F1C","#2EC4B6","#E71D36","#FF7F11","#A8DADC"];
+
+function generatePriceHistory(base,days=90,vol=0.02){
+  const data=[];let price=base*(0.85+Math.random()*0.15);const now=Date.now();
+  for(let i=days;i>=0;i--){
+    const d=new Date(now-i*86400000);
+    price=price*(1+(Math.random()-0.48)*vol);
+    data.push({date:d.toLocaleDateString("en-IN",{month:"short",day:"numeric"}),price:parseFloat(price.toFixed(2))});
+  }
+  return data;
+}
+function generateMFHistory(nav,days=365,vol=0.012){
+  const data=[];let p=nav;const now=Date.now();
+  for(let i=days;i>=0;i--){
+    const d=new Date(now-i*86400000);
+    p=p*(1+(Math.random()-0.46)*vol);
+    data.push({date:d.toLocaleDateString("en-IN",{month:"short",day:"numeric"}),price:parseFloat(p.toFixed(2))});
+  }
+  return data;
+}
+function getLivePrice(base){return parseFloat((base*(0.92+Math.random()*0.16)).toFixed(2));}
+function fmtPrice(v){return v>1000?("₹"+v.toLocaleString("en-IN",{maximumFractionDigits:0})):("₹"+v.toFixed(2));}
+
+function Sparkline({data,color,width=80,height=32}){
+  if(!data||data.length<2)return null;
+  const prices=data.map(d=>d.price);
+  const min=Math.min(...prices),max=Math.max(...prices),range=max-min||1;
+  const pts=prices.map((p,i)=>((i/(prices.length-1))*width)+","+(height-((p-min)/range)*height)).join(" ");
+  const c=color||(prices[prices.length-1]>=prices[0]?"#6BCB77":"#FF6B6B");
+  return React.createElement("svg",{width,height,style:{display:"block"}},
+    React.createElement("polyline",{points:pts,fill:"none",stroke:c,strokeWidth:"1.5",strokeLinejoin:"round"})
+  );
+}
+
+function MultiLineChart({series,height=300,focusedName=null,showActualPrice=false}){
+  const [hover,setHover]=useState(null);
+  const svgRef=useRef();
+  if(!series||series.length===0)return(
+    <div style={{height,display:"flex",alignItems:"center",justifyContent:"center",color:"#445",fontFamily:"monospace",fontSize:13}}>
+      Add a fund or stock above to see chart
+    </div>
+  );
+  const W=700,PAD={l:58,r:20,t:20,b:40};
+  const H=height-60;
+  const cw=W-PAD.l-PAD.r,ch=H-PAD.t-PAD.b;
+  const normalized=series.map(s=>({...s,data:s.data.map((d,i)=>({...d,pct:showActualPrice?d.price:(i===0?0:parseFloat((((d.price-s.data[0].price)/s.data[0].price)*100).toFixed(2)))}))}));
+  const allV=normalized.flatMap(s=>s.data.map(d=>d.pct));
+  const minP=Math.min(...allV),maxP=Math.max(...allV),range=maxP-minP||1;
+  const labels=normalized[0].data;
+  const step=Math.max(1,Math.floor(labels.length/8));
+  const toY=v=>PAD.t+ch-((v-minP)/range)*ch;
+  const toX=i=>PAD.l+(i/(labels.length-1))*cw;
+  const yTicks=5,yStep=range/yTicks;
+  const TW=192,TH=24+normalized.length*18+8;
+
+  function handleMouseMove(e){
+    const svg=svgRef.current;if(!svg)return;
+    const rect=svg.getBoundingClientRect();
+    const rawX=(e.clientX-rect.left)/rect.width*W;
+    const idx=Math.round(((rawX-PAD.l)/cw)*(labels.length-1));
+    if(idx<0||idx>=labels.length){setHover(null);return;}
+    setHover({idx,svgX:toX(idx)});
+  }
+
+  return(
+    <div style={{overflowX:"auto"}}>
+      <svg ref={svgRef} viewBox={"0 0 "+W+" "+(H+60)} style={{width:"100%",maxWidth:W,minWidth:300,cursor:"crosshair",display:"block"}}
+        onMouseMove={handleMouseMove} onMouseLeave={()=>setHover(null)}>
+        {Array.from({length:yTicks+1}).map((_,i)=>{
+          const v=minP+i*yStep,y=toY(v);
+          return <g key={i}>
+            <line x1={PAD.l} x2={W-PAD.r} y1={y} y2={y} stroke="#1e2a3a" strokeWidth="1"/>
+            <text x={PAD.l-6} y={y+4} fill="#445" fontSize="9" textAnchor="end">
+              {showActualPrice?(v>1000?("₹"+(v/1000).toFixed(1)+"k"):("₹"+v.toFixed(0))):(v.toFixed(1)+"%")}
+            </text>
+          </g>;
+        })}
+        {!showActualPrice&&minP<0&&maxP>0&&<line x1={PAD.l} x2={W-PAD.r} y1={toY(0)} y2={toY(0)} stroke="#334" strokeWidth="1.5" strokeDasharray="4,3"/>}
+        {labels.filter((_,i)=>i%step===0||i===labels.length-1).map((d,_,arr)=>{
+          const idx=labels.indexOf(d);
+          return <text key={idx} x={toX(idx)} y={H+14} fill="#445" fontSize="9" textAnchor="middle">{d.date}</text>;
+        })}
+        {normalized.map(s=>{
+          const focused=!focusedName||s.name===focusedName;
+          const pts=s.data.map((d,i)=>(toX(i)+","+toY(d.pct))).join(" ");
+          return <g key={s.name} opacity={focused?1:0.1}>
+            <polyline points={pts} fill="none" stroke={s.color} strokeWidth={s.name===focusedName?3:2} strokeLinejoin="round"/>
+            <circle cx={toX(s.data.length-1)} cy={toY(s.data[s.data.length-1].pct)} r="3.5" fill={s.color}/>
+          </g>;
+        })}
+        {hover&&(()=>{
+          const tx=hover.svgX+10+TW>W?hover.svgX-TW-10:hover.svgX+10,ty=PAD.t;
+          return <g>
+            <line x1={hover.svgX} x2={hover.svgX} y1={PAD.t} y2={PAD.t+ch} stroke="#ffffff15" strokeWidth="1" strokeDasharray="3,3"/>
+            {normalized.map(s=>{const d=s.data[hover.idx];if(!d)return null;return <circle key={s.name} cx={hover.svgX} cy={toY(d.pct)} r="4" fill={s.color} stroke="#040d18" strokeWidth="1.5"/>;})}
+            <rect x={tx} y={ty} width={TW} height={TH} rx="6" fill="#07111e" stroke="#1e3a5f" strokeWidth="1"/>
+            <text x={tx+10} y={ty+15} fill="#556" fontSize="9" fontFamily="monospace">{labels[hover.idx]&&labels[hover.idx].date}</text>
+            {normalized.map((s,si)=>{
+              const d=s.data[hover.idx];if(!d)return null;
+              const val=showActualPrice?fmtPrice(d.price):((d.pct>=0?"+":"")+d.pct.toFixed(2)+"%");
+              const label=s.name.length>24?s.name.slice(0,22)+"...":s.name;
+              return <g key={s.name}>
+                <circle cx={tx+10} cy={ty+25+si*18} r="4" fill={s.color}/>
+                <text x={tx+20} y={ty+29+si*18} fill="#a0b8d0" fontSize="9" fontFamily="monospace">{label}</text>
+                <text x={tx+TW-6} y={ty+29+si*18} fill={s.color} fontSize="9" fontFamily="monospace" textAnchor="end" fontWeight="bold">{val}</text>
+              </g>;
+            })}
+          </g>;
+        })()}
+      </svg>
+    </div>
+  );
+}
+
+function MarketTab(){
+  const BASE=[
+    {name:"NIFTY 50",val:24321.5,chg:0.82},{name:"SENSEX",val:80012.3,chg:0.76},
+    {name:"NIFTY BANK",val:52104.6,chg:1.12},{name:"NIFTY IT",val:35890.2,chg:-0.34},
+    {name:"NIFTY MID 100",val:52341.8,chg:1.45},{name:"NIFTY SMALLCAP",val:18234.9,chg:1.89},
+  ];
+  const [indices,setIndices]=useState(BASE);
+  const [search,setSearch]=useState("");
+  const [chartStock,setChartStock]=useState(null);
+  useEffect(()=>{
+    const id=setInterval(()=>setIndices(p=>p.map(idx=>({...idx,
+      val:parseFloat((idx.val*(1+(Math.random()-0.498)*0.001)).toFixed(1)),
+      chg:parseFloat((idx.chg+(Math.random()-0.5)*0.05).toFixed(2))
+    }))),3000);
+    return()=>clearInterval(id);
+  },[]);
+  const TOP=[
+    {name:"RELIANCE",price:2843.5,chg:1.2,base:2800},{name:"TCS",price:3456.8,chg:-0.45,base:3500},
+    {name:"HDFC BANK",price:1678.3,chg:0.89,base:1650},{name:"INFOSYS",price:1923.6,chg:-0.72,base:1950},
+    {name:"ICICI BANK",price:1234.5,chg:1.56,base:1200},{name:"WIPRO",price:578.9,chg:0.34,base:570},
+    {name:"BAJAJ FIN",price:6789.4,chg:2.1,base:6600},{name:"ADANI ENT",price:2456.7,chg:-1.23,base:2500},
+  ];
+  const filtered=TOP.filter(s=>search===""||s.name.includes(search.toUpperCase()));
+  return(
+    <div>
+      <h2 style={{color:"#00E5FF",fontFamily:"Syne,sans-serif",marginBottom:16,fontSize:18}}>🇮🇳 Indian Market Overview</h2>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(130px,1fr))",gap:8,marginBottom:20}}>
+        {indices.map(idx=>(
+          <div key={idx.name} style={{background:"#07111e",border:"1px solid "+(idx.chg>=0?"#6BCB7722":"#FF6B6B22"),borderRadius:10,padding:"10px 12px"}}>
+            <div style={{color:"#334",fontSize:9,fontFamily:"monospace"}}>{idx.name}</div>
+            <div style={{color:"#c8d8e8",fontSize:14,fontWeight:700,fontFamily:"monospace"}}>{idx.val.toLocaleString("en-IN")}</div>
+            <div style={{color:idx.chg>=0?"#6BCB77":"#FF6B6B",fontSize:11}}>{idx.chg>=0?"▲":"▼"} {Math.abs(idx.chg)}%</div>
+          </div>
+        ))}
+      </div>
+      <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search stock (RELIANCE, TCS, HDFC BANK)..."
+        style={{width:"100%",background:"#0d1b2a",border:"1px solid #1e3a5f",borderRadius:8,color:"#e0e8f0",padding:"10px 14px",fontFamily:"monospace",fontSize:12,outline:"none",marginBottom:14}}/>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(155px,1fr))",gap:8,marginBottom:18}}>
+        {filtered.map(s=>{
+          const h=generatePriceHistory(s.base,30);
+          const sel=chartStock&&chartStock.name===s.name;
+          return(
+            <div key={s.name} onClick={()=>setChartStock(s)}
+              style={{background:"#07111e",border:"1px solid "+(sel?"#00E5FF":"#1a2e44"),borderRadius:10,padding:"10px 12px",cursor:"pointer"}}>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
+                <div>
+                  <div style={{color:"#c8d8e8",fontFamily:"monospace",fontSize:12,fontWeight:700}}>{s.name}</div>
+                  <div style={{color:"#334",fontSize:10}}>NSE</div>
+                </div>
+                <div style={{textAlign:"right"}}>
+                  <div style={{color:"#a0b8d0",fontSize:12}}>₹{s.price}</div>
+                  <div style={{color:s.chg>=0?"#6BCB77":"#FF6B6B",fontSize:10}}>{s.chg>=0?"+":""}{s.chg}%</div>
+                </div>
+              </div>
+              <Sparkline data={h} color={s.chg>=0?"#6BCB77":"#FF6B6B"} width={128}/>
+            </div>
+          );
+        })}
+      </div>
+      {chartStock&&(
+        <div style={{background:"#07111e",border:"1px solid #1a2e44",borderRadius:12,padding:16}}>
+          <h3 style={{color:"#00E5FF",fontFamily:"monospace",fontSize:14,marginBottom:12}}>{chartStock.name} — 90D Chart</h3>
+          <MultiLineChart series={[{name:chartStock.name,data:generatePriceHistory(chartStock.base,90),color:"#00E5FF"}]} height={260} showActualPrice={true}/>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CompareTab(){
+  const [items,setItems]=useState([]);
+  const [input,setInput]=useState("");
+  const [sugg,setSugg]=useState([]);
+  const [tf,setTf]=useState("3M");
+  const [cat,setCat]=useState("All");
+  const [focused,setFocused]=useState(null);
+  const [showPrice,setShowPrice]=useState(false);
+  const days={"1M":30,"3M":90,"6M":180,"1Y":365,"3Y":1095}[tf];
+  const cats=["All","Large Cap","Mid Cap","Small Cap","Flexi Cap","ELSS","Index","Gold","Gold ETF","Silver","Silver ETF","Sectoral-IT","Sectoral-Pharma","Hybrid","Liquid"];
+
+  function getCat(name){const f=MF_CATALOG.find(m=>m.name===name);return f?f.category:"Other";}
+  function addItem(name){
+    if(!name.trim()||items.find(i=>i.name.toLowerCase()===name.toLowerCase()))return;
+    const nav=MF_BASE_NAV[name]||(50+Math.random()*200);
+    const isGS=name.includes("Gold")||name.includes("Silver");
+    const data=generateMFHistory(nav,days,isGS?0.006:0.012);
+    const color=COLORS[items.length%COLORS.length];
+    const category=getCat(name);
+    const change=parseFloat((((data[data.length-1].price-data[0].price)/data[0].price)*100).toFixed(2));
+    setItems(p=>[...p,{name,data,color,category,nav:data[data.length-1].price,change}]);
+    setInput("");setSugg([]);
+  }
+  function removeItem(name){setItems(p=>p.filter(i=>i.name!==name));if(focused===name)setFocused(null);}
+  useEffect(()=>{
+    setItems(p=>p.map(item=>{
+      const nav=MF_BASE_NAV[item.name]||100;
+      const isGS=item.name.includes("Gold")||item.name.includes("Silver");
+      const data=generateMFHistory(nav,days,isGS?0.006:0.012);
+      return{...item,data,nav:data[data.length-1].price,change:parseFloat((((data[data.length-1].price-data[0].price)/data[0].price)*100).toFixed(2))};
+    }));
+  },[tf]);
+
+  const catItems=cat==="All"?MF_CATALOG.slice(0,16):MF_CATALOG.filter(m=>m.category===cat);
+  const chartSeries=items.map(i=>({name:i.name,data:i.data,color:i.color}));
+
+  return(
+    <div>
+      <h2 style={{color:"#00E5FF",fontFamily:"Syne,sans-serif",marginBottom:4,fontSize:18}}>📊 Compare SIP / MF / Gold / Silver</h2>
+      <p style={{color:"#334",fontFamily:"monospace",fontSize:11,marginBottom:12}}>{MF_CATALOG.length}+ funds · Gold · Silver ETFs</p>
+
+      <div style={{position:"relative",marginBottom:10}}>
+        <div style={{display:"flex",gap:8}}>
+          <input value={input}
+            onChange={e=>{setInput(e.target.value);setSugg(e.target.value.length>1?MF_CATALOG.filter(m=>m.name.toLowerCase().includes(e.target.value.toLowerCase())).slice(0,8):[]);}}
+            onKeyDown={e=>e.key==="Enter"&&addItem(input)}
+            placeholder="Search fund, Gold ETF, Silver ETF..."
+            style={{flex:1,background:"#0d1b2a",border:"1px solid #1e3a5f",borderRadius:8,color:"#e0e8f0",padding:"10px 14px",fontFamily:"monospace",fontSize:12,outline:"none"}}/>
+          <button onClick={()=>addItem(input)} style={{background:"#00E5FF",color:"#000",border:"none",borderRadius:8,padding:"10px 18px",cursor:"pointer",fontWeight:700,fontSize:13}}>+ Add</button>
+        </div>
+        {sugg.length>0&&(
+          <div style={{position:"absolute",top:"100%",left:0,right:50,background:"#0a1628",border:"1px solid #1e3a5f",borderRadius:8,zIndex:200,overflow:"hidden",marginTop:4}}>
+            {sugg.map(s=>(
+              <div key={s.name} onClick={()=>addItem(s.name)}
+                style={{padding:"9px 14px",cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center",borderBottom:"1px solid #0e2040"}}
+                onMouseEnter={e=>e.currentTarget.style.background="#0e2040"}
+                onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                <span style={{color:"#a0b8d0",fontSize:12}}>{s.name}</span>
+                <span style={{fontSize:9,padding:"2px 7px",borderRadius:10,background:(CATEGORY_COLORS[s.category]||"#334")+"22",color:CATEGORY_COLORS[s.category]||"#556",marginLeft:8}}>{s.category}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div style={{display:"flex",flexWrap:"wrap",gap:5,marginBottom:10}}>
+        {cats.map(c=>(
+          <button key={c} onClick={()=>setCat(c)}
+            style={{background:cat===c?(CATEGORY_COLORS[c]||"#00E5FF")+"33":"#07111e",border:"1px solid "+(cat===c?(CATEGORY_COLORS[c]||"#00E5FF"):"#1a2e44"),color:cat===c?(CATEGORY_COLORS[c]||"#00E5FF"):"#445",borderRadius:20,padding:"3px 10px",cursor:"pointer",fontSize:10}}>
+            {c}
+          </button>
+        ))}
+      </div>
+
+      <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:12}}>
+        {catItems.slice(0,20).map(m=>{
+          const already=!!items.find(i=>i.name===m.name);
+          return(
+            <button key={m.name} onClick={()=>!already&&addItem(m.name)} disabled={already}
+              style={{background:already?"#091525":"#07111e",border:"1px solid "+(already?(CATEGORY_COLORS[m.category]||"#00E5FF")+"88":"#1a2e44"),color:already?(CATEGORY_COLORS[m.category]||"#00E5FF"):"#556",borderRadius:6,padding:"5px 10px",cursor:already?"default":"pointer",fontSize:11}}>
+              {already?"✓ ":"+ "}{m.name.length>28?m.name.slice(0,26)+"...":m.name}
+            </button>
+          );
+        })}
+      </div>
+
+      {items.length>0&&(
+        <div style={{display:"flex",flexWrap:"wrap",gap:8,marginBottom:10}}>
+          {items.map(item=>(
+            <div key={item.name} style={{display:"flex",alignItems:"center",gap:6,background:"#0a1628",border:"1px solid "+item.color+"44",borderRadius:20,padding:"5px 12px 5px 10px"}}>
+              <span style={{width:8,height:8,borderRadius:"50%",background:item.color,display:"inline-block",flexShrink:0}}/>
+              <span style={{color:"#c8d8e8",fontSize:11}}>{item.name}</span>
+              <span style={{fontSize:9,padding:"1px 6px",borderRadius:10,background:(CATEGORY_COLORS[item.category]||"#334")+"22",color:CATEGORY_COLORS[item.category]||"#556"}}>{item.category}</span>
+              <span style={{color:item.change>=0?"#6BCB77":"#FF6B6B",fontSize:12,marginLeft:2}}>{item.change>=0?"+":""}{item.change}%</span>
+              <button onClick={()=>removeItem(item.name)} style={{background:"none",border:"none",color:"#556",cursor:"pointer",fontSize:16,padding:"0 0 0 4px",lineHeight:1}}>×</button>
+            </div>
+          ))}
+          <button onClick={()=>{setItems([]);setFocused(null);}} style={{background:"none",border:"1px solid #1a2e44",color:"#334",borderRadius:20,padding:"5px 12px",cursor:"pointer",fontSize:11}}>Clear All</button>
+        </div>
+      )}
+
+      {items.length>0&&(
+        <div style={{display:"flex",gap:6,marginBottom:10}}>
+          {["1M","3M","6M","1Y","3Y"].map(t=>(
+            <button key={t} onClick={()=>setTf(t)}
+              style={{background:tf===t?"#00E5FF":"#0a1628",color:tf===t?"#000":"#557",border:"1px solid "+(tf===t?"#00E5FF":"#1e3a5f"),borderRadius:6,padding:"4px 12px",cursor:"pointer",fontSize:12,fontWeight:tf===t?700:400}}>
+              {t}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div style={{background:"#07111e",borderRadius:12,padding:"14px 8px 8px",border:"1px solid #1a2e44",marginBottom:12}}>
+        {items.length>0&&(
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8,paddingLeft:8,paddingRight:8}}>
+            <span style={{color:"#334",fontSize:11,fontFamily:"monospace"}}>
+              {showPrice?"Actual NAV / Price (₹)":"Normalized % Returns"}
+              {focused&&<span style={{color:"#00E5FF",marginLeft:8}}>· {focused.length>20?focused.slice(0,18)+"...":focused}</span>}
+            </span>
+            <div style={{display:"flex",gap:6}}>
+              <button onClick={()=>setShowPrice(p=>!p)}
+                style={{background:showPrice?"#00E5FF22":"transparent",border:"1px solid "+(showPrice?"#00E5FF":"#1e3a5f"),color:showPrice?"#00E5FF":"#445",borderRadius:6,padding:"3px 10px",cursor:"pointer",fontSize:10}}>
+                {showPrice?"₹ Price":"% Return"}
+              </button>
+              {focused&&<button onClick={()=>setFocused(null)} style={{background:"none",border:"1px solid #1e3a5f",color:"#556",borderRadius:6,padding:"3px 10px",cursor:"pointer",fontSize:10}}>Show All</button>}
+            </div>
+          </div>
+        )}
+        <MultiLineChart series={chartSeries} height={300} focusedName={focused} showActualPrice={showPrice}/>
+      </div>
+
+      {items.length>0&&(
+        <div style={{overflowX:"auto"}}>
+          <p style={{color:"#334",fontSize:11,fontFamily:"monospace",marginBottom:8}}>👆 Click any row to focus that fund on chart</p>
+          <table style={{width:"100%",borderCollapse:"collapse",fontFamily:"monospace",fontSize:12}}>
+            <thead>
+              <tr style={{borderBottom:"1px solid #1a2e44"}}>
+                {["Fund / Asset","Category","NAV / Price","Return ("+tf+")","Min","Max","Volatility"].map(h=>(
+                  <th key={h} style={{padding:"8px 10px",color:"#445",textAlign:"left",fontWeight:600,whiteSpace:"nowrap"}}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {items.map(item=>{
+                const prices=item.data.map(d=>d.price);
+                const minP=Math.min(...prices),maxP=Math.max(...prices);
+                const rets=prices.map((p,i)=>i===0?0:(p-prices[i-1])/prices[i-1]);
+                const vol=(Math.sqrt(rets.slice(1).reduce((a,r)=>a+r*r,0)/rets.length)*Math.sqrt(252)*100).toFixed(1);
+                const cc=CATEGORY_COLORS[item.category]||"#556";
+                const isFoc=focused===item.name;
+                return(
+                  <tr key={item.name}
+                    onClick={()=>setFocused(isFoc?null:item.name)}
+                    style={{borderBottom:"1px solid #0e1e30",cursor:"pointer",background:isFoc?item.color+"14":"transparent"}}
+                    onMouseEnter={e=>{if(!isFoc)e.currentTarget.style.background="#0a1828";}}
+                    onMouseLeave={e=>{e.currentTarget.style.background=isFoc?item.color+"14":"transparent";}}>
+                    <td style={{padding:"10px 10px"}}>
+                      <div style={{display:"flex",alignItems:"center",gap:8}}>
+                        <span style={{width:10,height:10,borderRadius:"50%",background:item.color,flexShrink:0,display:"inline-block",boxShadow:isFoc?"0 0 6px "+item.color:"none"}}/>
+                        <div>
+                          <div style={{color:isFoc?"#fff":"#c8d8e8",fontWeight:isFoc?700:400}}>{item.name}</div>
+                          {isFoc&&<div style={{color:"#334",fontSize:9}}>● focused · click to deselect</div>}
+                        </div>
+                      </div>
+                    </td>
+                    <td style={{padding:"10px 10px"}}><span style={{fontSize:10,padding:"2px 7px",borderRadius:10,background:cc+"22",color:cc,whiteSpace:"nowrap"}}>{item.category}</span></td>
+                    <td style={{padding:"10px 10px",color:"#a0b8d0"}}>{fmtPrice(item.nav)}</td>
+                    <td style={{padding:"10px 10px",color:item.change>=0?"#6BCB77":"#FF6B6B",fontWeight:700}}>{item.change>=0?"+":""}{item.change}%</td>
+                    <td style={{padding:"10px 10px",color:"#778"}}>{fmtPrice(minP)}</td>
+                    <td style={{padding:"10px 10px",color:"#778"}}>{fmtPrice(maxP)}</td>
+                    <td style={{padding:"10px 10px",color:"#C77DFF"}}>{vol}%</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PortfolioTab(){
+  const [holdings,setHoldings]=useState(MY_PORTFOLIO.map(h=>({...h,livePrice:getLivePrice(h.avgPrice),history:generatePriceHistory(h.avgPrice)})));
+  const [selected,setSelected]=useState([]);
+  const [dragOver,setDragOver]=useState(false);
+  const [fileMsg,setFileMsg]=useState("");
+  const fileRef=useRef();
+  useEffect(()=>{
+    const id=setInterval(()=>setHoldings(p=>p.map(h=>({...h,livePrice:getLivePrice(h.avgPrice)}))),4000);
+    return()=>clearInterval(id);
+  },[]);
+  const total=holdings.reduce((a,h)=>a+h.livePrice*h.qty,0);
+  const invested=holdings.reduce((a,h)=>a+h.avgPrice*h.qty,0);
+  const pnl=total-invested;
+  function toggleSelect(sym){setSelected(p=>p.includes(sym)?p.filter(s=>s!==sym):[...p,sym]);}
+  function removeSelected(){setHoldings(p=>p.filter(h=>!selected.includes(h.symbol)));setSelected([]);}
+  function handleFile(f){if(!f)return;setFileMsg("📂 Loaded: "+f.name);setTimeout(()=>setFileMsg(""),5000);}
+  const chartSeries=selected.map((sym,si)=>{const h=holdings.find(h=>h.symbol===sym);return h?{name:h.name,data:h.history,color:COLORS[si%COLORS.length]}:null;}).filter(Boolean);
+  return(
+    <div>
+      <h2 style={{color:"#00E5FF",fontFamily:"Syne,sans-serif",marginBottom:4,fontSize:18}}>💼 My Stock Portfolio</h2>
+      <p style={{color:"#334",fontFamily:"monospace",fontSize:11,marginBottom:14}}>From TradesAndCharges.xlsx · Prices update every 4s</p>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(130px,1fr))",gap:10,marginBottom:16}}>
+        {[{label:"Current Value",val:"₹"+total.toLocaleString("en-IN",{maximumFractionDigits:0}),color:"#00E5FF"},
+          {label:"Invested",val:"₹"+invested.toLocaleString("en-IN",{maximumFractionDigits:0}),color:"#a0b8d0"},
+          {label:"P&L",val:(pnl>=0?"+":"")+"₹"+Math.abs(pnl).toLocaleString("en-IN",{maximumFractionDigits:0}),color:pnl>=0?"#6BCB77":"#FF6B6B"},
+          {label:"Return %",val:(pnl>=0?"+":"")+((pnl/invested)*100).toFixed(2)+"%",color:pnl>=0?"#6BCB77":"#FF6B6B"},
+        ].map(c=>(
+          <div key={c.label} style={{background:"#07111e",border:"1px solid #1a2e44",borderRadius:10,padding:"12px 14px"}}>
+            <div style={{color:"#334",fontSize:10,fontFamily:"monospace",marginBottom:4}}>{c.label}</div>
+            <div style={{color:c.color,fontSize:15,fontWeight:700,fontFamily:"monospace"}}>{c.val}</div>
+          </div>
+        ))}
+      </div>
+      <div onDragOver={e=>{e.preventDefault();setDragOver(true);}} onDragLeave={()=>setDragOver(false)}
+        onDrop={e=>{e.preventDefault();setDragOver(false);handleFile(e.dataTransfer.files[0]);}}
+        onClick={()=>fileRef.current&&fileRef.current.click()}
+        style={{border:"2px dashed "+(dragOver?"#00E5FF":"#1e3a5f"),borderRadius:10,padding:"14px 20px",textAlign:"center",cursor:"pointer",marginBottom:12,background:dragOver?"#071828":"transparent"}}>
+        <input ref={fileRef} type="file" accept=".xlsx,.csv" style={{display:"none"}} onChange={e=>handleFile(e.target.files[0])}/>
+        <span style={{color:dragOver?"#00E5FF":"#334",fontFamily:"monospace",fontSize:12}}>📁 Drop TradesAndCharges.xlsx here or click to upload</span>
+      </div>
+      {fileMsg&&<div style={{color:"#6BCB77",fontFamily:"monospace",fontSize:12,marginBottom:10}}>{fileMsg}</div>}
+      {selected.length>0&&(
+        <div style={{display:"flex",gap:8,marginBottom:10,alignItems:"center"}}>
+          <span style={{color:"#445",fontFamily:"monospace",fontSize:12}}>{selected.length} selected</span>
+          <button onClick={removeSelected} style={{background:"#FF6B6B22",border:"1px solid #FF6B6B55",color:"#FF6B6B",borderRadius:6,padding:"4px 12px",cursor:"pointer",fontSize:12}}>🗑 Remove</button>
+          <button onClick={()=>setSelected([])} style={{background:"none",border:"1px solid #1e3a5f",color:"#445",borderRadius:6,padding:"4px 12px",cursor:"pointer",fontSize:12}}>Clear</button>
+        </div>
+      )}
+      <div style={{overflowX:"auto",marginBottom:16}}>
+        <table style={{width:"100%",borderCollapse:"collapse",fontFamily:"monospace",fontSize:12}}>
+          <thead>
+            <tr style={{borderBottom:"1px solid #1a2e44"}}>
+              <th style={{width:24}}/>
+              {["Stock","Qty","Avg ₹","Live ₹","Value","P&L","7D"].map(h=>(
+                <th key={h} style={{padding:"8px 10px",color:"#445",textAlign:"left",fontWeight:600}}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {holdings.map(h=>{
+              const val=h.livePrice*h.qty;
+              const p=(h.livePrice-h.avgPrice)*h.qty;
+              const pct=((h.livePrice-h.avgPrice)/h.avgPrice*100).toFixed(2);
+              const chk=selected.includes(h.symbol);
+              return(
+                <tr key={h.symbol} style={{borderBottom:"1px solid #0e1e30",background:chk?"#091525":"transparent"}}>
+                  <td style={{padding:"6px 4px"}}><input type="checkbox" checked={chk} onChange={()=>toggleSelect(h.symbol)} style={{accentColor:"#00E5FF",cursor:"pointer"}}/></td>
+                  <td style={{padding:"8px 10px"}}>
+                    <div style={{color:"#c8d8e8"}}>{h.name}</div>
+                    <div style={{color:"#334",fontSize:10}}>{h.symbol}</div>
+                  </td>
+                  <td style={{padding:"8px 10px",color:"#778"}}>{h.qty}</td>
+                  <td style={{padding:"8px 10px",color:"#778"}}>₹{h.avgPrice.toFixed(2)}</td>
+                  <td style={{padding:"8px 10px",color:"#00E5FF",fontWeight:700}}>₹{h.livePrice.toFixed(2)}</td>
+                  <td style={{padding:"8px 10px",color:"#a0b8d0"}}>₹{val.toLocaleString("en-IN",{maximumFractionDigits:0})}</td>
+                  <td style={{padding:"8px 10px",color:p>=0?"#6BCB77":"#FF6B6B",fontWeight:700}}>
+                    {p>=0?"+":""}₹{Math.abs(p).toFixed(0)} ({p>=0?"+":""}{pct}%)
+                  </td>
+                  <td style={{padding:"6px 10px"}}><Sparkline data={h.history.slice(-8)} color={p>=0?"#6BCB77":"#FF6B6B"}/></td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      {selected.length>0&&(
+        <div>
+          <h3 style={{color:"#00E5FF",fontFamily:"monospace",fontSize:14,marginBottom:10}}>📈 Compare Selected ({selected.length})</h3>
+          <div style={{background:"#07111e",borderRadius:12,padding:"14px 8px 8px",border:"1px solid #1a2e44"}}>
+            <MultiLineChart series={chartSeries} height={280} showActualPrice={true}/>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function App(){
+  const [tab,setTab]=useState("market");
+  const [clock,setClock]=useState("");
+  const [open,setOpen]=useState(false);
+  useEffect(()=>{
+    const tick=()=>{
+      const ist=new Date(new Date().toLocaleString("en-US",{timeZone:"Asia/Kolkata"}));
+      const h=ist.getHours(),m=ist.getMinutes();
+      setOpen((h>9||(h===9&&m>=15))&&(h<15||(h===15&&m<=30)));
+      setClock(ist.toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit",second:"2-digit"}));
+    };
+    tick();const id=setInterval(tick,1000);return()=>clearInterval(id);
+  },[]);
+  const tabs=[{id:"market",label:"🏛 Market"},{id:"compare",label:"📊 Compare SIP/MF"},{id:"portfolio",label:"💼 My Portfolio"}];
+  return(
+    <div style={{minHeight:"100vh",background:"#040d18",color:"#c8d8e8"}}>
+      <div style={{background:"#060f1e",borderBottom:"1px solid #0e2040",padding:"12px 20px",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:10}}>
+        <div>
+          <div style={{fontFamily:"Syne,sans-serif",fontWeight:800,fontSize:22,color:"#00E5FF"}}>₹ BHARAT MARKETS</div>
+          <div style={{fontSize:10,color:"#334",marginTop:2}}>NSE · BSE · MF Live Tracker</div>
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:12}}>
+          <span style={{background:open?"#6BCB7722":"#FF6B6B22",border:"1px solid "+(open?"#6BCB77":"#FF6B6B"),color:open?"#6BCB77":"#FF6B6B",borderRadius:20,padding:"3px 10px",fontSize:10,fontFamily:"monospace"}}>
+            {open?"● MARKET OPEN":"● MARKET CLOSED"}
+          </span>
+          <span style={{color:"#00E5FF",fontFamily:"monospace",fontSize:13}}>IST {clock}</span>
+        </div>
+      </div>
+      <div style={{background:"#060f1e",borderBottom:"1px solid #0e2040",display:"flex",padding:"0 16px",overflowX:"auto"}}>
+        {tabs.map(t=>(
+          <button key={t.id} onClick={()=>setTab(t.id)}
+            style={{background:"none",border:"none",borderBottom:"2px solid "+(tab===t.id?"#00E5FF":"transparent"),color:tab===t.id?"#00E5FF":"#334",padding:"12px 16px",cursor:"pointer",fontSize:12,fontWeight:tab===t.id?700:400,whiteSpace:"nowrap"}}>
+            {t.label}
+          </button>
+        ))}
+      </div>
+      <div style={{padding:"24px 20px",maxWidth:900,margin:"0 auto"}}>
+        {tab==="market"&&<MarketTab/>}
+        {tab==="compare"&&<CompareTab/>}
+        {tab==="portfolio"&&<PortfolioTab/>}
+      </div>
+      <div style={{borderTop:"1px solid #0e2040",padding:"12px 20px",textAlign:"center",color:"#1e2e40",fontSize:10,fontFamily:"monospace"}}>
+        Prices are simulated · Connect NSE/BSE API for live data · Built with your TradesAndCharges.xlsx
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
